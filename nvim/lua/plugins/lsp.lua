@@ -2,6 +2,9 @@
 return {
   {
     "neovim/nvim-lspconfig",
+    -- Pin to last commit before deprecation of Neovim 0.10 support (v3.0.0 drops it)
+    -- Remove this tag once Neovim is upgraded to 0.11+
+    tag = "v2.1.0",
     dependencies = {
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
