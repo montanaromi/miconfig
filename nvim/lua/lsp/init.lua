@@ -1,0 +1,47 @@
+-- ~/.config/nvim/lua/lsp/init.lua
+local mason = require("mason")
+local mason_lspconfig = require("mason-lspconfig")
+local lspconfig = require("lspconfig")
+local handlers = require("lsp.handlers")
+local servers = require("lsp.servers")
+
+mason.setup({
+  ui = {
+    icons = {
+      package_installed = "✓",
+      package_pending = "➜",
+      package_uninstalled = "✗",
+    },
+  },
+})
+
+mason_lspconfig.setup({
+  ensure_installed = vim.tbl_keys(servers),
+  automatic_installation = true,
+})
+
+-- Diagnostic display config
+vim.diagnostic.config({
+  virtual_text = { prefix = "●" },
+  signs = true,
+  underline = true,
+  update_in_insert = false,
+  severity_sort = true,
+  float = {
+    border = "rounded",
+    source = "always",
+  },
+})
+
+-- Rounded borders for hover and signature help
+vim.lsp.handlers["textDocument/hover"] =
+  vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
+vim.lsp.handlers["textDocument/signatureHelp"] =
+  vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
+
+-- Wire each server
+for server, config in pairs(servers) do
+  config.on_attach = handlers.on_attach
+  config.capabilities = handlers.capabilities
+  lspconfig[server].setup(config)
+end
