@@ -4,7 +4,9 @@ return {
     "hrsh7th/nvim-cmp",
     event = "InsertEnter",
     dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
+      -- cmp-nvim-lsp is intentionally NOT listed here; it is a dependency of
+      -- the LSP plugin (plugins/lsp.lua) so it loads at startup before any
+      -- LSP server calls default_capabilities().
       "hrsh7th/cmp-buffer",
       "hrsh7th/cmp-path",
       {
@@ -42,21 +44,27 @@ return {
             end
           end, { "i", "s" }),
           ["<S-Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_prev_item()
-            elseif luasnip.jumpable(-1) then
+            -- Prefer snippet backward-jump over cmp when both are active
+            if luasnip.jumpable(-1) then
               luasnip.jump(-1)
+            elseif cmp.visible() then
+              cmp.select_prev_item()
             else
               fallback()
             end
           end, { "i", "s" }),
         }),
-        sources = cmp.config.sources({
-          { name = "nvim_lsp" },
-          { name = "luasnip" },
-          { name = "buffer" },
-          { name = "path" },
-        }),
+        -- Two-group sources: LSP/snippets first, buffer/path as fallback
+        sources = cmp.config.sources(
+          {
+            { name = "nvim_lsp" },
+            { name = "luasnip" },
+          },
+          {
+            { name = "buffer", keyword_length = 3, max_item_count = 10 },
+            { name = "path" },
+          }
+        ),
         window = {
           completion = cmp.config.window.bordered(),
           documentation = cmp.config.window.bordered(),
