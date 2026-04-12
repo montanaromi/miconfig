@@ -29,9 +29,7 @@ return {
       auto_start = true,
       log_level  = "info",
       terminal = {
-        provider               = "snacks",
-        split_side             = "right",
-        split_width_percentage = 0.35,
+        provider        = "snacks",
         snacks_win_opts = {
           position = "right",
           width    = 0.35,
