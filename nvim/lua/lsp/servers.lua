@@ -5,7 +5,7 @@ return {
   rust_analyzer = {
     settings = {
       ["rust-analyzer"] = {
-        checkOnSave = { command = "clippy" },
+        check = { command = "clippy" },
       },
     },
   },
@@ -26,7 +26,7 @@ return {
       Lua = {
         diagnostics = { globals = { "vim" } },
         workspace = {
-          library = vim.api.nvim_get_runtime_file("", true),
+          library = vim.api.nvim_get_runtime_file("lua", true),
           checkThirdParty = false,
         },
         telemetry = { enable = false },

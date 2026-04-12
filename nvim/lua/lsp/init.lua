@@ -39,9 +39,11 @@ vim.lsp.handlers["textDocument/hover"] =
 vim.lsp.handlers["textDocument/signatureHelp"] =
   vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
 
--- Wire each server
+-- Wire each server (shallow-copy to avoid mutating the cached servers module)
 for server, config in pairs(servers) do
-  config.on_attach = handlers.on_attach
-  config.capabilities = handlers.capabilities
-  lspconfig[server].setup(config)
+  local merged = vim.tbl_extend("force", config, {
+    on_attach = handlers.on_attach,
+    capabilities = handlers.capabilities,
+  })
+  lspconfig[server].setup(merged)
 end
