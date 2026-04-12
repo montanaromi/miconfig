@@ -2,6 +2,14 @@
 return {
   {
     "mfussenegger/nvim-dap",
+    -- keys tell lazy.nvim to load nvim-dap when DAP keymaps from core/keymaps.lua are pressed
+    keys = {
+      { "<F5>",        function() require("dap").continue() end,           desc = "DAP: Continue" },
+      { "<F10>",       function() require("dap").step_over() end,          desc = "DAP: Step over" },
+      { "<F11>",       function() require("dap").step_into() end,          desc = "DAP: Step into" },
+      { "<F12>",       function() require("dap").step_out() end,           desc = "DAP: Step out" },
+      { "<leader>db",  function() require("dap").toggle_breakpoint() end,  desc = "DAP: Toggle breakpoint" },
+    },
     dependencies = {
       {
         "rcarriga/nvim-dap-ui",
