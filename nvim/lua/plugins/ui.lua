@@ -8,7 +8,7 @@ return {
       require("catppuccin").setup({
         flavour = "mocha",
         integrations = {
-          nvimtree = true,
+          neotree = true,
           telescope = true,
           treesitter = true,
           bufferline = true,
@@ -36,6 +36,7 @@ return {
   },
   {
     "akinsho/bufferline.nvim",
+    version = "*",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("bufferline").setup({
