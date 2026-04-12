@@ -18,6 +18,8 @@ mason.setup({
 mason_lspconfig.setup({
   ensure_installed = vim.tbl_keys(servers),
   automatic_installation = true,
+  -- automatic_enable requires vim.lsp.enable() which is Neovim 0.11+; disable on 0.10
+  automatic_enable = false,
 })
 
 -- Diagnostic display config
