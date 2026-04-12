@@ -1,11 +1,8 @@
 -- ~/.config/nvim/lua/lsp/init.lua
-local mason = require("mason")
-local mason_lspconfig = require("mason-lspconfig")
-local lspconfig = require("lspconfig")
 local handlers = require("lsp.handlers")
 local servers = require("lsp.servers")
 
-mason.setup({
+require("mason").setup({
   ui = {
     icons = {
       package_installed = "✓",
@@ -15,14 +12,12 @@ mason.setup({
   },
 })
 
-mason_lspconfig.setup({
+require("mason-lspconfig").setup({
   ensure_installed = vim.tbl_keys(servers),
   automatic_installation = true,
-  -- automatic_enable requires vim.lsp.enable() which is Neovim 0.11+; disable on 0.10
-  automatic_enable = false,
 })
 
--- Diagnostic display config
+-- Diagnostic display
 vim.diagnostic.config({
   virtual_text = { prefix = "●" },
   signs = true,
@@ -35,17 +30,21 @@ vim.diagnostic.config({
   },
 })
 
--- Rounded borders for hover and signature help
-vim.lsp.handlers["textDocument/hover"] =
-  vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
-vim.lsp.handlers["textDocument/signatureHelp"] =
-  vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
+-- Global floating-window border (replaces vim.lsp.with, Neovim 0.11+)
+vim.o.winborder = "rounded"
 
--- Wire each server (shallow-copy to avoid mutating the cached servers module)
+-- Global LSP defaults applied to every server
+vim.lsp.config("*", {
+  on_attach = handlers.on_attach,
+  capabilities = handlers.capabilities,
+})
+
+-- Per-server overrides
 for server, config in pairs(servers) do
-  local merged = vim.tbl_extend("force", config, {
-    on_attach = handlers.on_attach,
-    capabilities = handlers.capabilities,
-  })
-  lspconfig[server].setup(merged)
+  if next(config) ~= nil then
+    vim.lsp.config(server, config)
+  end
 end
+
+-- Enable all configured servers
+vim.lsp.enable(vim.tbl_keys(servers))
