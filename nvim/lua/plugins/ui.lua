@@ -3,6 +3,7 @@ return {
   {
     "catppuccin/nvim",
     name = "catppuccin",
+    lazy = false,
     priority = 1000,
     config = function()
       require("catppuccin").setup({
@@ -14,6 +15,8 @@ return {
           bufferline = true,
           gitsigns = true,
           which_key = true,
+          dap = true,
+          dap_ui = true,
         },
       })
       vim.cmd.colorscheme("catppuccin")
