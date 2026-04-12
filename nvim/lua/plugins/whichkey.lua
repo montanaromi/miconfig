@@ -16,6 +16,7 @@ return {
         { "<leader>d",  group = "Debug (DAP)" },
         { "<leader>s",  group = "Show (Diagnostics)" },
         { "<leader>b",  group = "Buffer" },
+        { "<leader>a",  group = "AI (Claude)" },
       })
     end,
   },
