@@ -2,6 +2,7 @@
 return {
   {
     "nvim-telescope/telescope.nvim",
+    tag = "0.1.8",  -- Pin for Neovim 0.10; latest requires 0.11+
     cmd = "Telescope",
     keys = {
       { "<leader>ff" },
