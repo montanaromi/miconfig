@@ -1,0 +1,51 @@
+-- ~/.config/nvim/lua/plugins/ui.lua
+return {
+  {
+    "catppuccin/nvim",
+    name = "catppuccin",
+    priority = 1000,
+    config = function()
+      require("catppuccin").setup({
+        flavour = "mocha",
+        integrations = {
+          nvimtree = true,
+          telescope = true,
+          treesitter = true,
+          bufferline = true,
+          gitsigns = true,
+          which_key = true,
+        },
+      })
+      vim.cmd.colorscheme("catppuccin")
+    end,
+  },
+  {
+    "nvim-lualine/lualine.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("lualine").setup({
+        options = {
+          theme = "catppuccin",
+          globalstatus = true,
+        },
+        sections = {
+          lualine_x = { "encoding", "fileformat", "filetype" },
+        },
+      })
+    end,
+  },
+  {
+    "akinsho/bufferline.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("bufferline").setup({
+        options = {
+          diagnostics = "nvim_lsp",
+          offsets = {
+            { filetype = "neo-tree", text = "File Explorer", highlight = "Directory" },
+          },
+        },
+      })
+    end,
+  },
+}
