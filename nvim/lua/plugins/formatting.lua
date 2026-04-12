@@ -23,13 +23,13 @@ return {
         },
         format_on_save = {
           timeout_ms = 500,
-          lsp_fallback = true,
+          lsp_format = "fallback",
         },
         notify_on_error = true,
       })
 
       vim.keymap.set({ "n", "v" }, "<leader>cf", function()
-        require("conform").format({ async = true, lsp_fallback = true })
+        require("conform").format({ async = true, lsp_format = "fallback" })
       end, { desc = "Format file" })
     end,
   },

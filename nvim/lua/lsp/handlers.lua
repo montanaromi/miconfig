@@ -16,7 +16,7 @@ M.on_attach = function(_, bufnr)
   map("<leader>ca", vim.lsp.buf.code_action, "Code Action")
   map("[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
   map("]d", vim.diagnostic.goto_next, "Next Diagnostic")
-  map("<leader>d", vim.diagnostic.open_float, "Show Diagnostic")
+  map("<leader>sd", vim.diagnostic.open_float, "Show Diagnostic")
   map("<leader>q", vim.diagnostic.setloclist, "Diagnostic List")
 end
 

@@ -19,7 +19,7 @@ map("n", "<leader>bd", ":bdelete<CR>", { desc = "Delete buffer" })
 map("n", "<leader>h", ":nohlsearch<CR>", { desc = "Clear search highlight" })
 
 -- File tree
-map("n", "<leader>e", ":Neotree toggle<CR>", { desc = "Toggle file tree" })
+map("n", "<leader>e", "<Cmd>Neotree toggle<CR>", { desc = "Toggle file tree" })
 
 -- Telescope
 map("n", "<leader>ff", ":Telescope find_files<CR>", { desc = "Find files" })

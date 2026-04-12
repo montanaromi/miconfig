@@ -13,7 +13,8 @@ return {
         { "<leader>f",  group = "Find (Telescope)" },
         { "<leader>g",  group = "Git" },
         { "<leader>c",  group = "Code (LSP)" },
-        { "<leader>d",  group = "Debug / Diagnostics" },
+        { "<leader>d",  group = "Debug (DAP)" },
+        { "<leader>s",  group = "Show (Diagnostics)" },
         { "<leader>b",  group = "Buffer" },
       })
     end,
