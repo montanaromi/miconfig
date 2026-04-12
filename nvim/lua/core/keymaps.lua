@@ -1,6 +1,6 @@
 -- ~/.config/nvim/lua/core/keymaps.lua
 vim.g.mapleader = " "
-vim.g.maplocalleader = " "
+vim.g.maplocalleader = ","
 
 local map = vim.keymap.set
 
@@ -32,11 +32,11 @@ map("n", "<leader>fd", ":Telescope diagnostics<CR>", { desc = "Diagnostics" })
 map("n", "<leader>gg", ":LazyGit<CR>", { desc = "Open LazyGit" })
 
 -- DAP
-map("n", "<F5>", ":lua require('dap').continue()<CR>", { desc = "DAP: Continue" })
-map("n", "<F10>", ":lua require('dap').step_over()<CR>", { desc = "DAP: Step over" })
-map("n", "<F11>", ":lua require('dap').step_into()<CR>", { desc = "DAP: Step into" })
-map("n", "<F12>", ":lua require('dap').step_out()<CR>", { desc = "DAP: Step out" })
-map("n", "<leader>db", ":lua require('dap').toggle_breakpoint()<CR>", { desc = "DAP: Toggle breakpoint" })
+map("n", "<F5>",  function() require("dap").continue() end,           { desc = "DAP: Continue" })
+map("n", "<F10>", function() require("dap").step_over() end,          { desc = "DAP: Step over" })
+map("n", "<F11>", function() require("dap").step_into() end,          { desc = "DAP: Step into" })
+map("n", "<F12>", function() require("dap").step_out() end,           { desc = "DAP: Step out" })
+map("n", "<leader>db", function() require("dap").toggle_breakpoint() end, { desc = "DAP: Toggle breakpoint" })
 
 -- Better indenting in visual mode
 map("v", "<", "<gv", { desc = "Indent left" })
