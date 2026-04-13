@@ -3,6 +3,7 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
+[![License][license-shield]][license-url]
 
 <!-- Project header -->
 <div align="center">
@@ -97,6 +98,17 @@ make sync
 
 Rewrites `.gitmodules` HTTPS URLs to SSH, updates all submodules, then restores the original `.gitmodules`. Safe to re-run at any time.
 
+### Git Aliases
+
+Installed automatically by `make install`:
+
+| Alias | Expands to |
+|-------|------------|
+| `git s` | `git status` |
+| `git a` | `git add .` |
+| `git chb <branch>` | `git checkout -b <branch>` |
+| `git cm "<msg>"` | `git commit -m "<msg>"` |
+
 ### Claude Code Skills
 
 Skills are symlinked into `~/.claude/skills/` and immediately available in Claude Code. Edits to skill files in this repo take effect without reinstalling.
@@ -121,11 +133,14 @@ miconfig/
 │       ├── aap/              # Agent Action Plan document parser
 │       ├── tech-spec/        # Technical Specification parser
 │       └── logger/           # GCP kubectl log gap analysis
-├── nvim/                     # Submodule: Neovim configuration
-│   ├── init.lua              # Entry point (lazy.nvim)
-│   └── lua/                  # Plugin configs and LSP setup
-└── openvino-npu/             # Intel NPU inference experiments
+└── nvim/                     # Submodule: Neovim configuration
+    ├── init.lua              # Entry point (lazy.nvim)
+    └── lua/                  # Plugin configs and LSP setup
 ```
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
@@ -150,6 +165,8 @@ Project Link: [https://github.com/montanaromi/miconfig](https://github.com/monta
 [stars-url]: https://github.com/montanaromi/miconfig/stargazers
 [issues-shield]: https://img.shields.io/github/issues/montanaromi/miconfig.svg?style=flat
 [issues-url]: https://github.com/montanaromi/miconfig/issues
+[license-shield]: https://img.shields.io/github/license/montanaromi/miconfig.svg?style=flat
+[license-url]: https://github.com/montanaromi/miconfig/blob/master/LICENSE
 [python-shield]: https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white
 [python-url]: https://python.org
 [neovim-shield]: https://img.shields.io/badge/Neovim-57A143?style=flat&logo=neovim&logoColor=white

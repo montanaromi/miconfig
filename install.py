@@ -88,7 +88,57 @@ def _windows_command(src: Path, dst: Path, bin_dir: Path, name: str) -> None:
     print(f"  note: add {bin_dir} to your PATH")
 
 
+GIT_ALIASES = {
+    "s":   "status",
+    "a":   "add .",
+    "chb": "checkout -b",
+    "cm":  "commit -m",
+}
+
+
+def _git_global(key: str) -> str:
+    """Return the current global git config value for key, or empty string."""
+    result = subprocess.run(
+        ["git", "config", "--global", key],
+        capture_output=True, text=True,
+    )
+    return result.stdout.strip()
+
+
+def setup_git() -> None:
+    """Prompt for git identity and install productivity aliases."""
+    if not shutil.which("git"):
+        print("  skip  git setup (git not found)", flush=True)
+        return
+
+    print("\n=== git setup ===", flush=True)
+
+    current_name = _git_global("user.name")
+    current_email = _git_global("user.email")
+
+    prompt_name = f"  GitHub username [{current_name}]: " if current_name else "  GitHub username: "
+    name = input(prompt_name).strip() or current_name
+
+    prompt_email = f"  GitHub email [{current_email}]: " if current_email else "  GitHub email: "
+    email = input(prompt_email).strip() or current_email
+
+    if name:
+        subprocess.run(["git", "config", "--global", "user.name", name], check=True)
+        print(f"  set     user.name = {name}")
+    if email:
+        subprocess.run(["git", "config", "--global", "user.email", email], check=True)
+        print(f"  set     user.email = {email}")
+
+    for alias, expansion in GIT_ALIASES.items():
+        subprocess.run(
+            ["git", "config", "--global", f"alias.{alias}", expansion], check=True
+        )
+        print(f"  alias   git {alias} -> git {expansion}")
+
+
 def main() -> None:
+    setup_git()
+
     installers = [
         HERE / "nvim" / "install.py",
         HERE / "claude-config" / "install.py",

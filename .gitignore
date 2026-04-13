@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# openvino NPU experiments
+openvino-npu/
+
+# macOS
+.DS_Store
+
+# Editor
+.idea/
+*.swp
+*.swo
