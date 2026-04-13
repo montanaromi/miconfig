@@ -1,0 +1,3 @@
+# miconfig Python dependencies
+# All scripts use stdlib only — no third-party packages required.
+# This file is a placeholder for future additions.
