@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+"""archie-sync — sync miconfig submodules from anywhere."""
+
+import subprocess
+import sys
+from pathlib import Path
+
+# Resolve through symlinks so this works from ~/.local/bin or anywhere else
+REPO_ROOT = Path(__file__).resolve().parent.parent
+SYNC_SCRIPT = REPO_ROOT / "sync-submodules.py"
+
+
+def main() -> None:
+    if not SYNC_SCRIPT.exists():
+        sys.exit(f"Error: sync script not found at {SYNC_SCRIPT}")
+    result = subprocess.run([sys.executable, str(SYNC_SCRIPT)])
+    sys.exit(result.returncode)
+
+
+if __name__ == "__main__":
+    main()
