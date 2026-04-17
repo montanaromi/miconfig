@@ -136,8 +136,25 @@ def setup_git() -> None:
         print(f"  alias   git {alias} -> git {expansion}")
 
 
+def init_submodules() -> None:
+    """Ensure all git submodules are cloned and up-to-date."""
+    if not shutil.which("git"):
+        return
+    gitmodules = HERE / ".gitmodules"
+    if not gitmodules.exists():
+        return
+    print("\n=== submodules ===", flush=True)
+    result = subprocess.run(
+        ["git", "submodule", "update", "--init", "--recursive"],
+        cwd=str(HERE),
+    )
+    if result.returncode != 0:
+        print("  warning: submodule init failed", flush=True)
+
+
 def main() -> None:
     setup_git()
+    init_submodules()
 
     installers = [
         HERE / "nvim" / "install.py",
