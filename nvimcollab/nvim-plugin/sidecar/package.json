@@ -1,0 +1,11 @@
+{
+  "name": "nvimcollab-sidecar",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "ws": "^8.18.0",
+    "y-websocket": "^2.0.0",
+    "yjs": "^13.6.0"
+  }
+}
