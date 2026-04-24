@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NvimCollab</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #1e1e2e; color: #cdd6f4; height: 100vh; display: flex; flex-direction: column; }
+    #header { padding: 8px 16px; background: #181825; display: flex; justify-content: space-between; align-items: center; font-size: 14px; border-bottom: 1px solid #313244; }
+    #header .room { color: #89b4fa; }
+    #header .status { font-size: 12px; }
+    #header .status.connected { color: #a6e3a1; }
+    #header .status.disconnected { color: #f38ba8; }
+    #participants { display: flex; gap: 8px; }
+    #participants .participant { font-size: 12px; padding: 2px 8px; border-radius: 4px; background: #313244; }
+    #editor { flex: 1; overflow: auto; }
+    .cm-editor { height: 100%; }
+    .cm-scroller { overflow: auto; }
+    /* Remote cursor styling */
+    .cm-ySelectionInfo { font-size: 11px; padding: 1px 4px; border-radius: 2px; font-family: system-ui; }
+  </style>
+</head>
+<body>
+  <div id="header">
+    <span>nvimcollab — <span class="room" id="room-name">default</span></span>
+    <div id="participants"></div>
+    <span class="status disconnected" id="status">disconnected</span>
+  </div>
+  <div id="editor"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
