@@ -79,7 +79,7 @@ end
 -- Apply a remote edit (offset-based) to the buffer
 function apply_remote_edit(offset, delete_count, insert_text)
   local buf = M.attached_buf
-  if not buf then return end
+  if not buf or not vim.api.nvim_buf_get_option(buf, "modifiable") then return end
 
   local start_row, start_col = offset_to_pos(buf, offset)
 
