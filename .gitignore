@@ -18,3 +18,11 @@ openvino-npu/
 .idea/
 *.swp
 *.swo
+
+# Node
+node_modules/
+package-lock.json
+dist/
+
+# Chuck findings
+.chuck/
