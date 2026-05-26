@@ -22,6 +22,7 @@ HERE = Path(__file__).resolve().parent
 # Commands to expose globally: bin/<name> → <user-bin>/<name>
 COMMANDS = [
     "archie-sync",
+    "jira-sync",
 ]
 
 
