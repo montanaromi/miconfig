@@ -54,6 +54,7 @@ Config management is handled through git submodules (neovim, Claude Code) and a 
 
 - Git
 - macOS or Ubuntu/Debian
+- Homebrew, on macOS — `setup.sh` installs packages through it and does not install it
 - Internet connection (for package downloads)
 
 ### Installation

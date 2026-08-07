@@ -137,10 +137,35 @@ def setup_git() -> None:
         print(f"  alias   git {alias} -> git {expansion}")
 
 
+SUBMODULE_HELP = """
+  Two causes account for almost every failure here — check git's output above.
+
+  1. "Permission denied (publickey)" — submodules are cloned over SSH, so this
+     machine needs a GitHub SSH key. Verify with `ssh -T git@github.com`, then:
+
+         a. Copy your public key:  cat ~/.ssh/id_ed25519.pub
+         b. Add it at:             https://github.com/settings/ssh/new
+         c. Re-run:                make install
+
+     No key yet? Generate and wire one up with `./setup.sh --phase 4`.
+
+  2. "not our ref" / "did not contain <sha>" — the commit this repo pins no
+     longer exists upstream (force-pushed or rebased away). Move the submodules
+     to their current upstream tips and record the new pointers:
+
+         make sync
+         git add <submodule-path> && git commit
+"""
+
+
 def init_submodules() -> None:
-    """Ensure all git submodules are cloned and up-to-date."""
+    """Ensure all git submodules are cloned and up-to-date.
+
+    Fatal on failure: every installer below lives inside a submodule, so
+    continuing past this point silently installs nothing.
+    """
     if not shutil.which("git"):
-        return
+        sys.exit("Error: git not found in PATH — cannot fetch submodules.")
     gitmodules = HERE / ".gitmodules"
     if not gitmodules.exists():
         return
@@ -150,7 +175,29 @@ def init_submodules() -> None:
         cwd=str(HERE),
     )
     if result.returncode != 0:
-        print("  warning: submodule init failed", flush=True)
+        print("\nError: could not fetch submodules.", flush=True)
+        print(SUBMODULE_HELP, flush=True)
+        sys.exit(1)
+
+
+# The command each installed config exists to configure, and how to get it.
+# Linking a config for a tool that isn't installed yet is harmless — the tool
+# may arrive later — so a miss is reported, not fatal. Without this, a machine
+# whose package phase never ran gets a fully "successful" install of configs
+# for editors it does not have.
+CONFIG_TOOLS = {
+    "nvim": "brew install neovim   (or ./setup.sh --phase 1)",
+}
+
+
+def check_tools() -> None:
+    missing = [tool for tool in CONFIG_TOOLS if not shutil.which(tool)]
+    if not missing:
+        return
+    print("\n=== tool check ===", flush=True)
+    for tool in missing:
+        print(f"  warning: {tool} is not on PATH — its config is installed but unused")
+        print(f"           install it with: {CONFIG_TOOLS[tool]}", flush=True)
 
 
 def main() -> None:
@@ -165,12 +212,17 @@ def main() -> None:
     failed = []
     for installer in installers:
         if not installer.exists():
-            print(f"  skip  {installer.relative_to(HERE)} (not found)", flush=True)
+            # A missing installer means its submodule was never checked out,
+            # not that there is nothing to do — don't pass it off as a skip.
+            rel = installer.relative_to(HERE)
+            print(f"  ERROR {rel} (not found — submodule not checked out)", flush=True)
+            failed.append(rel)
             continue
         if not run(installer):
             failed.append(installer.relative_to(HERE))
 
     install_commands()
+    check_tools()
 
     print()
     if failed:
