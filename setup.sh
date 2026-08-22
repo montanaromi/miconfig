@@ -66,7 +66,7 @@ if phase 1 "System packages" && [[ "$HAS_SUDO" == true ]]; then
     else
       skip "Homebrew"
     fi
-    brew bundle --no-lock --file=/dev/stdin <<BREWEOF
+    brew bundle --file=/dev/stdin <<BREWEOF || true
 brew "git"
 brew "curl"
 brew "wget"
@@ -89,6 +89,14 @@ brew "helm"
 brew "k3d"
 brew "kubectl"
 BREWEOF
+    brew_missing=()
+    for pkg in git curl wget zsh neovim tmux htop bat ripgrep fzf tree jq yq cloc ranger pspg colordiff gh helm k3d kubectl; do
+      brew list "$pkg" &>/dev/null || brew_missing+=("$pkg")
+    done
+    if [[ ${#brew_missing[@]} -gt 0 ]]; then
+      fail "Missing Homebrew packages: ${brew_missing[*]}"
+      exit 1
+    fi
     ok "Homebrew packages"
 
   elif [[ "$OS" == "Linux" ]]; then
@@ -287,6 +295,10 @@ if phase 3 "Languages"; then
     skip "nvm"
   fi
   export NVM_DIR="$HOME/.nvm"
+  # nvm conflicts with npmrc prefix — remove it before loading nvm
+  if [ -f "$HOME/.npmrc" ] && grep -q '^prefix=' "$HOME/.npmrc"; then
+    sedi '/^prefix=/d' "$HOME/.npmrc"
+  fi
   [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
   if ! nvm ls --no-colors "$NODE_VERSION" &>/dev/null; then
     nvm install "$NODE_VERSION"
