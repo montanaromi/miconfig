@@ -88,9 +88,20 @@ brew "gh"
 brew "helm"
 brew "k3d"
 brew "kubectl"
+brew "bore-cli"
+brew "ffmpeg"
+brew "llama.cpp"
+brew "mdcat"
+brew "pandoc"
+brew "postgresql@14"
+brew "railway"
+brew "redis"
+brew "snyk"
+brew "supabase"
+brew "flyctl"
 BREWEOF
     brew_missing=()
-    for pkg in git curl wget zsh neovim tmux htop bat ripgrep fzf tree jq yq cloc ranger pspg colordiff gh helm k3d kubectl; do
+    for pkg in git curl wget zsh neovim tmux htop bat ripgrep fzf tree jq yq cloc ranger pspg colordiff gh helm k3d kubectl bore-cli ffmpeg llama.cpp mdcat pandoc postgresql@14 railway redis snyk supabase flyctl; do
       brew list "$pkg" &>/dev/null || brew_missing+=("$pkg")
     done
     if [[ ${#brew_missing[@]} -gt 0 ]]; then
@@ -107,7 +118,8 @@ BREWEOF
       python3-pip python3-venv software-properties-common \
       libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev \
       libncursesw5-dev libffi-dev liblzma-dev tk-dev \
-      apt-transport-https ca-certificates gnupg lsb-release
+      apt-transport-https ca-certificates gnupg lsb-release \
+      ffmpeg pandoc redis-server
     ok "apt packages"
 
     # bat symlink (Ubuntu ships batcat)
@@ -127,8 +139,8 @@ BREWEOF
   fi
 fi
 
-# ─── Phase 2: Docker + cloud tools (Linux only, requires sudo) ───────
-if phase 2 "Docker & cloud tools" && [[ "$HAS_SUDO" == true ]]; then
+# ─── Phase 2: Docker & infrastructure (Linux, requires sudo) ────────
+if phase 2 "Docker & infrastructure" && [[ "$HAS_SUDO" == true ]]; then
   if [[ "$OS" == "Linux" ]]; then
     # Docker
     if ! has docker; then
@@ -152,49 +164,6 @@ if phase 2 "Docker & cloud tools" && [[ "$HAS_SUDO" == true ]]; then
       ok "GitHub CLI"
     else
       skip "GitHub CLI"
-    fi
-
-    # Google Cloud SDK
-    if ! has gcloud; then
-      curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --yes --dearmor -o /etc/apt/keyrings/cloud.google.gpg
-      echo "deb [signed-by=/etc/apt/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list > /dev/null
-      sudo apt-get update -qq
-      sudo apt-get install -y -qq google-cloud-cli
-      ok "Google Cloud SDK"
-    else
-      skip "Google Cloud SDK"
-    fi
-
-    # Azure CLI
-    if ! has az; then
-      curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --yes --dearmor -o /etc/apt/keyrings/microsoft.gpg
-      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/azure-cli.list > /dev/null
-      sudo apt-get update -qq
-      sudo apt-get install -y -qq azure-cli
-      ok "Azure CLI"
-    else
-      skip "Azure CLI"
-    fi
-
-    # 1Password
-    if ! has op; then
-      curl -fsSL https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --yes --dearmor -o /etc/apt/keyrings/1password.gpg
-      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/1password.gpg] https://downloads.1password.com/linux/debian/amd64 stable main" | sudo tee /etc/apt/sources.list.d/1password.list > /dev/null
-      sudo apt-get update -qq
-      sudo apt-get install -y -qq 1password
-      ok "1Password"
-    else
-      skip "1Password"
-    fi
-
-    # .NET SDK
-    if ! has dotnet; then
-      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/ubuntu/$(lsb_release -rs)/prod $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/dotnet.list > /dev/null
-      sudo apt-get update -qq
-      sudo apt-get install -y -qq dotnet-sdk-8.0
-      ok ".NET SDK 8"
-    else
-      skip ".NET SDK"
     fi
 
     # kubectl
@@ -224,22 +193,10 @@ if phase 2 "Docker & cloud tools" && [[ "$HAS_SUDO" == true ]]; then
       skip "k3d"
     fi
 
-    # Java
-    if ! has java; then
-      sudo apt-get install -y -qq openjdk-21-jdk
-      ok "OpenJDK 21"
-    else
-      skip "Java"
-    fi
-
     # Firewall
     sudo ufw allow ssh 2>/dev/null || true
     sudo ufw --force enable 2>/dev/null || true
     ok "UFW"
-
-  elif [[ "$OS" == "Darwin" ]]; then
-    # macOS gets Docker Desktop, gcloud, etc. via cask or manual install
-    echo "  · macOS: install Docker Desktop, gcloud SDK, and Azure CLI manually or via brew cask"
   fi
 fi
 
@@ -457,19 +414,169 @@ JOURNALEOF
   fi
 fi
 
-# ─── Phase 6: Snaps (Linux only, requires sudo) ─────────────────────
-if phase 6 "Desktop apps" && [[ "$HAS_SUDO" == true ]]; then
-  if [[ "$OS" == "Linux" ]] && has snap; then
-    for app in firefox spotify; do
-      snap list "$app" &>/dev/null && skip "$app" && continue
-      sudo snap install "$app" && ok "$app"
-    done
-    for app in slack postman pycharm-professional; do
-      snap list "$app" &>/dev/null && skip "$app" && continue
-      sudo snap install "$app" --classic && ok "$app"
-    done
-  elif [[ "$OS" == "Darwin" ]]; then
-    echo "  · macOS: install desktop apps via App Store or brew cask"
+# ─── Phase 6: Optional extras (Apps / Cloud / Fonts) ────────────────
+if phase 6 "Optional extras"; then
+  if [[ -n "${MICONFIG_EXTRAS:-}" ]]; then
+    cat_input="$MICONFIG_EXTRAS"
+  elif [[ -t 0 ]]; then
+    echo ""
+    echo "  Select categories to install (comma-separated):"
+    echo "    [A] Apps   — 1Password, Docker Desktop, Slack, Arc, Figma, Postman, ..."
+    echo "    [C] Cloud  — Google Cloud SDK, Azure CLI, Vercel CLI, .NET SDK"
+    echo "    [F] Fonts  — Fira Code, JetBrains Mono, Roboto, Noto, ..."
+    echo ""
+    echo "    [all]  All categories"
+    echo "    [none] Skip"
+    echo ""
+    read -rp "  Categories [A,C,F]: " cat_input
+  else
+    echo "  Non-interactive — skipping optional extras."
+    echo "  Set MICONFIG_EXTRAS='a,c,f' or 'all' to install."
+    cat_input="none"
+  fi
+
+  cat_input="${cat_input,,}"
+
+  INSTALL_APPS=false
+  INSTALL_CLOUD=false
+  INSTALL_FONTS=false
+
+  if [[ "$cat_input" == "all" ]]; then
+    INSTALL_APPS=true; INSTALL_CLOUD=true; INSTALL_FONTS=true
+  elif [[ "$cat_input" != "none" && -n "$cat_input" ]]; then
+    [[ "$cat_input" == *"a"* ]] && INSTALL_APPS=true
+    [[ "$cat_input" == *"c"* ]] && INSTALL_CLOUD=true
+    [[ "$cat_input" == *"f"* ]] && INSTALL_FONTS=true
+  fi
+
+  # ── Apps ──
+  if [[ "$INSTALL_APPS" == true ]]; then
+    echo ""
+    echo "  ── Apps ──"
+    if [[ "$OS" == "Darwin" ]]; then
+      CASK_APPS=(1password docker iterm2 arc slack spotify postman jetbrains-toolbox figma claude utm netbird tailscale ngrok git-credential-manager)
+      for app in "${CASK_APPS[@]}"; do
+        if brew list --cask "$app" &>/dev/null; then
+          skip "$app"
+        else
+          brew install --cask "$app" && ok "$app" || fail "$app"
+        fi
+      done
+      if ! brew list 1password-cli &>/dev/null; then
+        brew install 1password-cli && ok "1password-cli"
+      else
+        skip "1password-cli"
+      fi
+
+    elif [[ "$OS" == "Linux" ]] && [[ "$HAS_SUDO" == true ]]; then
+      # 1Password
+      if ! has op; then
+        curl -fsSL https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --yes --dearmor -o /etc/apt/keyrings/1password.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/1password.gpg] https://downloads.1password.com/linux/debian/amd64 stable main" | sudo tee /etc/apt/sources.list.d/1password.list > /dev/null
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq 1password
+        ok "1Password"
+      else
+        skip "1Password"
+      fi
+      # Snap apps
+      if has snap; then
+        for app in firefox spotify; do
+          snap list "$app" &>/dev/null && skip "$app" && continue
+          sudo snap install "$app" && ok "$app"
+        done
+        for app in slack postman pycharm-professional; do
+          snap list "$app" &>/dev/null && skip "$app" && continue
+          sudo snap install "$app" --classic && ok "$app"
+        done
+      fi
+    fi
+  fi
+
+  # ── Cloud ──
+  if [[ "$INSTALL_CLOUD" == true ]]; then
+    echo ""
+    echo "  ── Cloud ──"
+    if [[ "$OS" == "Darwin" ]]; then
+      if ! brew list --cask google-cloud-sdk &>/dev/null; then
+        brew install --cask google-cloud-sdk && ok "Google Cloud SDK"
+      else
+        skip "Google Cloud SDK"
+      fi
+      if ! brew list azure-cli &>/dev/null; then
+        brew install azure-cli && ok "Azure CLI"
+      else
+        skip "Azure CLI"
+      fi
+      if ! brew list vercel-cli &>/dev/null; then
+        brew install vercel-cli && ok "Vercel CLI"
+      else
+        skip "Vercel CLI"
+      fi
+
+    elif [[ "$OS" == "Linux" ]] && [[ "$HAS_SUDO" == true ]]; then
+      # Google Cloud SDK
+      if ! has gcloud; then
+        curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --yes --dearmor -o /etc/apt/keyrings/cloud.google.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list > /dev/null
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq google-cloud-cli
+        ok "Google Cloud SDK"
+      else
+        skip "Google Cloud SDK"
+      fi
+      # Azure CLI
+      if ! has az; then
+        curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --yes --dearmor -o /etc/apt/keyrings/microsoft.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/azure-cli.list > /dev/null
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq azure-cli
+        ok "Azure CLI"
+      else
+        skip "Azure CLI"
+      fi
+      # .NET SDK
+      if ! has dotnet; then
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/ubuntu/$(lsb_release -rs)/prod $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/dotnet.list > /dev/null
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq dotnet-sdk-8.0
+        ok ".NET SDK 8"
+      else
+        skip ".NET SDK"
+      fi
+      # Vercel CLI
+      if ! has vercel; then
+        npm install -g vercel && ok "Vercel CLI" || fail "Vercel CLI"
+      else
+        skip "Vercel CLI"
+      fi
+    fi
+    echo ""
+    echo "  After install, authenticate with:"
+    echo "    gcloud auth login"
+    echo "    az login"
+    echo "    gh auth login"
+  fi
+
+  # ── Fonts ──
+  if [[ "$INSTALL_FONTS" == true ]]; then
+    echo ""
+    echo "  ── Fonts ──"
+    if [[ "$OS" == "Darwin" ]]; then
+      FONT_CASKS=(font-fira-code font-jetbrains-mono font-roboto font-roboto-mono font-noto-sans font-noto-sans-mono font-noto-serif font-open-sans font-lato font-inconsolata)
+      for font in "${FONT_CASKS[@]}"; do
+        if brew list --cask "$font" &>/dev/null; then
+          skip "$font"
+        else
+          brew install --cask "$font" && ok "$font" || fail "$font"
+        fi
+      done
+    elif [[ "$OS" == "Linux" ]] && [[ "$HAS_SUDO" == true ]]; then
+      sudo apt-get install -y -qq \
+        fonts-firacode fonts-jetbrains-mono fonts-roboto fonts-noto \
+        fonts-open-sans fonts-lato 2>/dev/null || true
+      ok "System fonts"
+    fi
   fi
 fi
 
