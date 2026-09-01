@@ -82,17 +82,32 @@ Provisions a dev machine in 6 phases. Detects macOS vs Linux and installs accord
 
 | Phase | What | macOS | Ubuntu |
 |-------|------|-------|--------|
-| 1 | System packages | Homebrew | apt |
-| 2 | Docker, gcloud, az, gh, kubectl, helm, k3d, 1Password, .NET | manual / cask | apt repos |
+| 1 | System packages (git, neovim, ffmpeg, supabase, snyk, ...) | Homebrew | apt |
+| 2 | Docker & infrastructure (Docker, gh, kubectl, helm, k3d, UFW) | — | apt repos |
 | 3 | Go, pyenv (3.12 + 3.13), nvm (LTS), Rust | same | same |
 | 4 | zsh, Oh My Zsh, SSH key, .zshrc integrations | same | same |
 | 5 | `~/Lab/{Work,Sandbox,Utils}`, `~/notes/`, journal system | same | same |
-| 6 | Firefox, Spotify, Slack, PyCharm, Postman | App Store | snap |
+| 6 | Optional extras — interactive category prompt (see below) | brew cask | apt / snap |
+
+Phase 6 prompts you to choose from three categories:
+
+| Category | What's included |
+|----------|----------------|
+| **Apps** | 1Password, Docker Desktop, iTerm2, Arc, Slack, Spotify, Postman, JetBrains Toolbox, Figma, Claude, UTM, NetBird, Tailscale, ngrok, git-credential-manager |
+| **Cloud** | Google Cloud SDK, Azure CLI, Vercel CLI, .NET SDK |
+| **Fonts** | Fira Code, JetBrains Mono, Roboto, Noto, Open Sans, Lato, Inconsolata |
 
 Run a single phase:
 
 ```bash
 ./setup.sh --phase 3
+```
+
+Pre-select Phase 6 categories non-interactively:
+
+```bash
+MICONFIG_EXTRAS=all ./setup.sh --phase 6   # install all categories
+MICONFIG_EXTRAS=a,f ./setup.sh --phase 6   # apps + fonts only
 ```
 
 Guest accounts (limited sudo) automatically skip phases 1, 2, and 6.
