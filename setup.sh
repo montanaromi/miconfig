@@ -59,15 +59,16 @@ sedi() {
 # ─── Phase 1: System packages (requires sudo) ───────────────────────
 if phase 1 "System packages" && [[ "$HAS_SUDO" == true ]]; then
   if [[ "$OS" == "Darwin" ]]; then
-    if ! xcode-select -p &>/dev/null; then
+    if ! cc -v &>/dev/null; then
       echo "  Installing Xcode Command Line Tools (gcc, make, git)..."
       xcode-select --install
-      echo "  Waiting for Xcode CLT install to finish..."
-      until xcode-select -p &>/dev/null; do sleep 5; done
+      echo "  Waiting for Xcode CLT install to finish (GUI prompt)..."
+      until cc -v &>/dev/null; do sleep 5; done
       ok "Xcode Command Line Tools"
     else
       skip "Xcode Command Line Tools"
     fi
+    sudo xcodebuild -license accept 2>/dev/null || true
 
     if ! has brew; then
       echo "  Installing Homebrew..."
