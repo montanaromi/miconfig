@@ -59,6 +59,16 @@ sedi() {
 # ─── Phase 1: System packages (requires sudo) ───────────────────────
 if phase 1 "System packages" && [[ "$HAS_SUDO" == true ]]; then
   if [[ "$OS" == "Darwin" ]]; then
+    if ! xcode-select -p &>/dev/null; then
+      echo "  Installing Xcode Command Line Tools (gcc, make, git)..."
+      xcode-select --install
+      echo "  Waiting for Xcode CLT install to finish..."
+      until xcode-select -p &>/dev/null; do sleep 5; done
+      ok "Xcode Command Line Tools"
+    else
+      skip "Xcode Command Line Tools"
+    fi
+
     if ! has brew; then
       echo "  Installing Homebrew..."
       /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -66,8 +76,19 @@ if phase 1 "System packages" && [[ "$HAS_SUDO" == true ]]; then
     else
       skip "Homebrew"
     fi
+    # Ensure brew is on PATH (fresh install won't have shell config yet)
+    if ! has brew; then
+      if [[ -x /opt/homebrew/bin/brew ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+      elif [[ -x /usr/local/bin/brew ]]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+      fi
+    fi
     brew bundle --file=/dev/stdin <<BREWEOF || true
+tap "snyk/tap"
+tap "supabase/tap"
 brew "git"
+brew "git-lfs"
 brew "curl"
 brew "wget"
 brew "zsh"
@@ -84,6 +105,7 @@ brew "cloc"
 brew "ranger"
 brew "pspg"
 brew "colordiff"
+brew "duti"
 brew "gh"
 brew "helm"
 brew "k3d"
@@ -96,12 +118,15 @@ brew "pandoc"
 brew "postgresql@14"
 brew "railway"
 brew "redis"
-brew "snyk"
-brew "supabase"
+brew "snyk/tap/snyk"
+brew "supabase/tap/supabase"
 brew "flyctl"
+brew "dotnet@8"
+brew "openjdk@21"
+brew "powershell"
 BREWEOF
     brew_missing=()
-    for pkg in git curl wget zsh neovim tmux htop bat ripgrep fzf tree jq yq cloc ranger pspg colordiff gh helm k3d kubectl bore-cli ffmpeg llama.cpp mdcat pandoc postgresql@14 railway redis snyk supabase flyctl; do
+    for pkg in git git-lfs curl wget zsh neovim tmux htop bat ripgrep fzf tree jq yq cloc ranger pspg colordiff duti gh helm k3d kubectl bore-cli ffmpeg llama.cpp mdcat pandoc postgresql@14 railway redis snyk/tap/snyk supabase/tap/supabase flyctl dotnet@8 openjdk@21 powershell; do
       brew list "$pkg" &>/dev/null || brew_missing+=("$pkg")
     done
     if [[ ${#brew_missing[@]} -gt 0 ]]; then
@@ -454,7 +479,7 @@ if phase 6 "Optional extras"; then
     echo ""
     echo "  ── Apps ──"
     if [[ "$OS" == "Darwin" ]]; then
-      CASK_APPS=(1password docker iterm2 arc slack spotify postman jetbrains-toolbox figma claude utm netbird tailscale ngrok git-credential-manager)
+      CASK_APPS=(1password docker iterm2 arc slack spotify postman jetbrains-toolbox figma claude claude-code utm netbird tailscale ngrok git-credential-manager)
       for app in "${CASK_APPS[@]}"; do
         if brew list --cask "$app" &>/dev/null; then
           skip "$app"
@@ -498,8 +523,8 @@ if phase 6 "Optional extras"; then
     echo ""
     echo "  ── Cloud ──"
     if [[ "$OS" == "Darwin" ]]; then
-      if ! brew list --cask google-cloud-sdk &>/dev/null; then
-        brew install --cask google-cloud-sdk && ok "Google Cloud SDK"
+      if ! brew list --cask gcloud-cli &>/dev/null; then
+        brew install --cask gcloud-cli && ok "Google Cloud SDK"
       else
         skip "Google Cloud SDK"
       fi
