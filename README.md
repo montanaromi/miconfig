@@ -127,7 +127,27 @@ Symlinks neovim and Claude Code configs into their OS-specific locations, sets u
 
 ### `make sync`
 
-Updates all git submodules. Temporarily rewrites HTTPS URLs to SSH for environments with only SSH auth, then restores the originals.
+Updates all git submodules. Temporarily rewrites HTTPS URLs to SSH for environments with only SSH auth, then restores the originals. Pass a branch with `make sync BRANCH=qa`.
+
+### `archie-sync`
+
+Available as a shell command in any git repo, not just miconfig — it acts on whatever repo your current directory belongs to.
+
+```bash
+archie-sync                  # sync submodules to their tracked branches
+archie-sync qa               # put this repo and every submodule on qa
+archie-sync qa --stash       # stash uncommitted work first, restore after
+archie-sync qa --no-parent   # submodules only; leave the parent's branch alone
+archie-sync qa --json        # machine-readable summary
+```
+
+**Branch fallback.** A submodule with no `qa` branch is synced to its own default branch instead, and the run reports which ones fell back. You always end up with a complete working tree.
+
+**Uncommitted changes.** The run aborts before touching anything and lists what's dirty. `--stash` opts in to stashing first and restoring afterwards.
+
+**Stash ledger.** Every auto-stash is recorded in `.archie-sync-stashes.json` at the parent repo root (gitignored) with its stash SHA and an absolute `recover_with` command, so stashed work stays findable by you or an agent even when a restore conflicts. On conflict the branch is left clean and the stash is kept on the stack rather than leaving conflict markers behind.
+
+**Never force-resets.** A branch whose local commits have diverged from its remote is reported and left alone, not overwritten.
 
 ## Structure
 
@@ -140,7 +160,10 @@ miconfig/
   sync-submodules.py    submodule updater (HTTPS-to-SSH rewrite)
   Makefile              entry points: setup, guest, install, sync
   bin/
-    archie-sync         run sync-submodules.py from anywhere via symlink
+    archie-sync         run sync-submodules.py against the current repo
+  shell-config.d/       drop-ins copied to ~/.shell-config.d by setup.sh
+    journal.sh          journal/note/todo commands
+    archie-sync.sh      archie-sync shell function (works without PATH changes)
   nvim/                 neovim config (submodule: mivim)
   claude-config/        Claude Code config (submodule)
   nvimcollab/           real-time neovim collaboration prototype
@@ -165,6 +188,7 @@ miconfig/
 - **Oh My Zsh** with `xiong-chiamiov-plus` theme
 - **pyenv**, **nvm**, **cargo** PATH integrations
 - **Journal system** with `journal`, `note`, `todo`, `todos` commands
+- **`archie-sync`** submodule sync, usable from any git repo
 - Aliases: `vim` to nvim, `blitz` to `~/Lab/Work`, `sandbox` to `~/Lab/Sandbox`
 
 ## Contributing

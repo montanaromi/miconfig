@@ -500,12 +500,18 @@ if phase 5 "Directories"; then
   done
   ok "~/Lab/{Work,Sandbox,Utils}, ~/notes, ~/bin"
 
-  # Journal system
+  # Shell drop-ins from the repo (journal.sh, archie-sync.sh, ...)
   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  if [ -f "$SCRIPT_DIR/shell-config.d/journal.sh" ]; then
-    cp "$SCRIPT_DIR/shell-config.d/journal.sh" "$HOME/.shell-config.d/journal.sh"
-    ok "journal.sh (from repo)"
-  elif [ ! -f "$HOME/.shell-config.d/journal.sh" ]; then
+  if [ -d "$SCRIPT_DIR/shell-config.d" ]; then
+    for f in "$SCRIPT_DIR"/shell-config.d/*.sh; do
+      [ -r "$f" ] || continue
+      cp "$f" "$HOME/.shell-config.d/$(basename "$f")"
+      ok "$(basename "$f") (from repo)"
+    done
+  fi
+
+  # Journal fallback for a checkout without the repo drop-ins
+  if [ ! -f "$HOME/.shell-config.d/journal.sh" ]; then
     cat > "$HOME/.shell-config.d/journal.sh" << 'JOURNALEOF'
 _journal_file() {
   local today=$(date +%Y-%m-%d) year=$(date +%Y) month=$(date +%m) dayname=$(date +%A)

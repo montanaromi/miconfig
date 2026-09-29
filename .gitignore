@@ -26,3 +26,6 @@ dist/
 
 # Chuck findings
 .chuck/
+
+# archie-sync auto-stash ledger (machine-local record of stashed work)
+.archie-sync-stashes.json
