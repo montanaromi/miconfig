@@ -85,8 +85,6 @@ if phase 1 "System packages" && [[ "$HAS_SUDO" == true ]]; then
       fi
     fi
     brew bundle --file=/dev/stdin <<BREWEOF || true
-tap "snyk/tap"
-tap "supabase/tap"
 brew "git"
 brew "git-lfs"
 brew "curl"
@@ -118,15 +116,13 @@ brew "pandoc"
 brew "postgresql@14"
 brew "railway"
 brew "redis"
-brew "snyk/tap/snyk"
-brew "supabase/tap/supabase"
 brew "flyctl"
 brew "dotnet@8"
 brew "openjdk@21"
 brew "powershell"
 BREWEOF
     brew_missing=()
-    for pkg in git git-lfs curl wget zsh neovim tmux htop bat ripgrep fzf tree jq yq cloc ranger pspg colordiff duti gh helm k3d kubectl bore-cli ffmpeg llama.cpp mdcat pandoc postgresql@14 railway redis snyk/tap/snyk supabase/tap/supabase flyctl dotnet@8 openjdk@21 powershell; do
+    for pkg in git git-lfs curl wget zsh neovim tmux htop bat ripgrep fzf tree jq yq cloc ranger pspg colordiff duti gh helm k3d kubectl bore-cli ffmpeg llama.cpp mdcat pandoc postgresql@14 railway redis flyctl dotnet@8 openjdk@21 powershell; do
       brew list "$pkg" &>/dev/null || brew_missing+=("$pkg")
     done
     if [[ ${#brew_missing[@]} -gt 0 ]]; then
