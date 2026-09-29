@@ -93,7 +93,7 @@ Phase 6 prompts you to choose from three categories:
 
 | Category | What's included |
 |----------|----------------|
-| **Apps** | 1Password, Docker Desktop, iTerm2, Arc, Slack, Spotify, Postman, JetBrains Toolbox, Figma, Claude, UTM, NetBird, Tailscale, ngrok, git-credential-manager |
+| **Apps** | 1Password, Docker Desktop, iTerm2, Arc, Slack, Spotify, Postman, JetBrains Toolbox, Figma, Claude, UTM, ngrok, git-credential-manager |
 | **Cloud** | Google Cloud SDK, Azure CLI, Vercel CLI, .NET SDK |
 | **Fonts** | Fira Code, JetBrains Mono, Roboto, Noto, Open Sans, Lato, Inconsolata |
 
